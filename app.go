@@ -109,12 +109,12 @@ func GetIPHandler(c *gin.Context) {
 	for i, ip := range ipParts {
 		ipParts[i] = strings.TrimSpace(ip)
 	}
-	clientIP := ipParts[0]
+	clientIP := ipParts[1]
 	c.String(http.StatusOK, clientIP)
 }
 
 /*
-	/views/increment
+	/visits/increment
 
 Increments the counter and returns the current views before the increment
 */
@@ -175,6 +175,6 @@ func main() {
 	r.GET("/", HelloHandler)
 	r.GET("/headers", HeaderHandler)
 	r.GET("/ip", GetIPHandler)
-	r.GET("/views/increment", visitsHandler)
+	r.GET("/visits/increment", visitsHandler)
 	r.Run(":5000")
 }
