@@ -14,7 +14,7 @@ var lmt *limiter.Limiter
 func initRateLimiter() {
 	lmt = tollbooth.NewLimiter(1, nil)
 	lmt.SetIPLookup(limiter.IPLookup{
-		Name:           "CF-Connecting-IP",
+		Name:           "X-Forwarded-For",
 		IndexFromRight: 0,
 	})
 }
@@ -25,7 +25,7 @@ func isRateLimited(c *gin.Context) bool {
 }
 
 func HelloHandler(c *gin.Context) {
-	c.String(http.StatusOK, "Hello, World!\nYour IP address: " + c.GetHeader("CF-Connecting-IP"))
+	c.String(http.StatusOK, "Hello, World!\nYour IP address: " + c.GetHeader("X-Forwarded-For"))
 }
 
 func HeaderHandler(c *gin.Context) {
