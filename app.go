@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +43,7 @@ func initFailSafe() int {
 			createFile = true
 		} else {
 			fmt.Println("Unexpected error while checking for existence of views: ", err)
+			return 1
 		}
 	}
 
@@ -52,36 +51,12 @@ func initFailSafe() int {
 		file, err := os.Create("visits.txt")
 		if err != nil {
 			fmt.Println("Error while failsafe was running and tried creating views file: ", err)
+			return 1
 		}
 
 		file.WriteString("0")
 		defer file.Close()
 	}
-
-	_, filename, _, _ := runtime.Caller(0)
-	dir := filepath.Dir(filename)
-	fmt.Println("Current Go file directory:", dir)
-	workingDirOld, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error getting current working directory (before CD): ", err)
-		return 1
-	}
-
-	fmt.Println("Working directory: ", workingDirOld)
-
-	err = os.Chdir(dir)
-	if err != nil {
-		fmt.Println("Error changing directory:", err)
-		return 1
-	}
-
-	workingDir, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error getting current working directory:", err)
-		return 1
-	}
-
-	fmt.Println("Working Directory after Chdir: ", workingDir)
 	return 0
 }
 
@@ -158,8 +133,11 @@ func visitsHandler(c *gin.Context) {
 
 func main() {
 	initRateLimiter()
-	initFailSafe()
-
+	codefail := initFailSafe()
+	if codefail != 0 {
+		fmt.Println("Exception inside initFailSafe, error code 1...")
+		return
+	}
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
