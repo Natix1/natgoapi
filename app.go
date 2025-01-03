@@ -21,7 +21,7 @@ While rate limiting for my use case is definitely not necessary, it's included.
 */
 
 func initRateLimiter() {
-	lmt = tollbooth.NewLimiter(2, nil)
+	lmt = tollbooth.NewLimiter(5, nil)
 	lmt.SetIPLookup(limiter.IPLookup{
 		Name:           "X-Forwarded-For",
 		IndexFromRight: 0,
@@ -122,7 +122,6 @@ func visitsHandler(c *gin.Context) {
 	strVisits, err := os.ReadFile("visits.txt")
 	if err != nil {
 		fmt.Println("Failed to read visits:", err)
-
 		c.String(http.StatusInternalServerError, "")
 	}
 
