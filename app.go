@@ -7,30 +7,38 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var lmt *limiter.Limiter
+
+func initRateLimiter() {
+	lmt = tollbooth.NewLimiter(1, nil)
+	lmt.SetIPLookup(limiter.IPLookup{
+		Name:           "CF-Connecting-IP",
+		IndexFromRight: 0,
+	})
+}
+
+func isRateLimited(c *gin.Context) bool {
+	httpError := tollbooth.LimitByRequest(lmt, c.Writer, c.Request)
+	return httpError != nil
+}
+
 func HelloHandler(c *gin.Context) {
 	c.String(http.StatusOK, "Hello, World!")
 }
 
 func main() {
-	// Create a new tollbooth limiter
-	lmt := tollbooth.NewLimiter(1, nil)
+	initRateLimiter()
 
-	// Set up IP lookup for rate limiting using the "CF-Connecting-IP" header
-	lmt.SetIPLookup(limiter.IPLookup{
-		Name:           "CF-Connecting-IP",
-		IndexFromRight: 0,
-	})
+	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.Default()
 
 	rateLimitMiddleware := func(c *gin.Context) {
-		httpError := tollbooth.LimitByRequest(lmt, c.Writer, c.Request)
-		if httpError != nil {
+		if isRateLimited(c) {
 			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit exceeded"})
 			c.Abort()
 			return
 		}
-
 		c.Next()
 	}
 
@@ -38,5 +46,5 @@ func main() {
 
 	r.GET("/", HelloHandler)
 
-	r.Run(":8080")
+	r.Run(":5000")
 }
