@@ -23,7 +23,7 @@ func isRateLimited(c *gin.Context) bool {
 }
 
 func HelloHandler(c *gin.Context) {
-	c.String(http.StatusOK, "Hello, World!")
+	c.String(http.StatusOK, "Hello, World!\nYour IP address: " + c.GetHeader("CF-Connecting-IP"))
 }
 
 func main() {
