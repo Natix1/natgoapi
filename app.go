@@ -16,7 +16,7 @@ import (
 var lmt *limiter.Limiter
 
 // For cors
-const DOMAIN = "natixone.xyz"
+const DOMAIN = "https://natixone.xyz"
 
 /*
 While rate limiting for my use case is definitely not necessary, it's included.
