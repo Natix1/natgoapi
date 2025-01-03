@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/didip/tollbooth/v8"
 	"github.com/didip/tollbooth/v8/limiter"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -15,6 +16,9 @@ import (
 )
 
 var lmt *limiter.Limiter
+
+// For cors
+const DOMAIN = "natixone.xyz"
 
 /*
 While rate limiting for my use case is definitely not necessary, it's included.
@@ -170,6 +174,13 @@ func main() {
 	}
 
 	r.Use(rateLimitMiddleware)
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{DOMAIN},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+	}))
 
 	r.GET("/", HelloHandler)
 	r.GET("/headers", HeaderHandler)
