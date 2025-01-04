@@ -60,6 +60,36 @@ func initFailSafe() int {
 	return 0
 }
 
+func getVisits() (int, error) {
+	strVisits, err := os.ReadFile("visits.txt")
+	if err != nil {
+		return 0, err
+	}
+
+	frmStrVisits := strings.ReplaceAll(strings.TrimSpace(string(strVisits)), "\n", "")
+	intVisits, err := strconv.Atoi(frmStrVisits)
+	if err != nil {
+		return 0, err
+	}
+	return intVisits, nil
+}
+
+func writeVisits(visits int) error {
+	file, err := os.Create("visits.txt")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	visits += 1
+	_, err = file.WriteString(fmt.Sprint(visits))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 /* Handlers */
 
 /*  /  */
@@ -97,38 +127,17 @@ func GetIPHandler(c *gin.Context) {
 
 Increments the counter and returns the current views before the increment
 */
+
 func visitsHandler(c *gin.Context) {
-	strVisits, err := os.ReadFile("visits.txt")
+	intVisits, err := getVisits()
 	if err != nil {
-		fmt.Println("Failed to read visits:", err)
-		c.String(http.StatusInternalServerError, "")
-	}
-
-	frmStrVisits := strings.ReplaceAll(strings.TrimSpace(string(strVisits)), "\n", "")
-	intVisits, err := strconv.Atoi(frmStrVisits)
-	if err != nil {
-		fmt.Println("Failed to convert visits count: ", err)
+		fmt.Println("Failed to open visits: ", err)
 		c.String(http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 
-	c.String(http.StatusOK, fmt.Sprint(intVisits))
-	file, err := os.Create("visits.txt")
-	if err != nil {
-		fmt.Println("Failed to open views for reading: ", err)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
-	}
-
-	defer file.Close()
-
-	intVisits += 1
-	_, err = file.WriteString(fmt.Sprint(intVisits))
-	if err != nil {
-		fmt.Println("Failed to write visits: ", err)
-		c.String(http.StatusInternalServerError, "Internal Server Error")
-		return
-	}
+	c.String(http.StatusOK, fmt.Sprintf("%d", intVisits))
+	go writeVisits(intVisits)
 }
 
 func main() {
