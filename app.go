@@ -122,13 +122,26 @@ func GetIPHandler(c *gin.Context) {
 	c.String(http.StatusOK, clientIP)
 }
 
+/* /visits */
+
+func visitsHandler(c *gin.Context) {
+	intVisits, err := getVisits()
+	if err != nil {
+		fmt.Println("Failed to open visits: ", err)
+		c.String(http.StatusInternalServerError, "Internal Server Error")
+		return
+	}
+
+	c.String(http.StatusOK, fmt.Sprintf("%d", intVisits))
+}
+
 /*
 	/visits/increment
 
 Increments the counter and returns the current views before the increment
 */
 
-func visitsHandler(c *gin.Context) {
+func visitsIncrementHandler(c *gin.Context) {
 	intVisits, err := getVisits()
 	if err != nil {
 		fmt.Println("Failed to open visits: ", err)
@@ -172,6 +185,7 @@ func main() {
 	r.GET("/", HelloHandler)
 	r.GET("/headers", HeaderHandler)
 	r.GET("/ip", GetIPHandler)
-	r.GET("/visits/increment", visitsHandler)
+	r.GET("/visits", visitsHandler)
+	r.GET("/visits/increment", visitsIncrementHandler)
 	r.Run(":5000")
 }
