@@ -15,9 +15,6 @@ import (
 
 var lmt *limiter.Limiter
 
-// For cors
-const DOMAIN = "https://natixone.xyz"
-
 /*
 While rate limiting for my use case is definitely not necessary, it's included.
 */
@@ -175,8 +172,8 @@ func main() {
 
 	r.Use(rateLimitMiddleware)
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{DOMAIN},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"*"},
 		AllowCredentials: true,
