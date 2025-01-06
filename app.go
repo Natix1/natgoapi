@@ -10,10 +10,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 var lmt *limiter.Limiter
+var visitsLock sync.Mutex
 
 /*
 While rate limiting for my use case is definitely not necessary, it's included.
@@ -58,6 +60,9 @@ func initFailSafe() int {
 }
 
 func getVisits() (int, error) {
+	visitsLock.Lock()
+	defer visitsLock.Unlock()
+
 	strVisits, err := os.ReadFile("visits.txt")
 	if err != nil {
 		return 0, err
@@ -72,6 +77,9 @@ func getVisits() (int, error) {
 }
 
 func writeVisits(visits int) error {
+	visitsLock.Lock()
+	defer visitsLock.Unlock()
+
 	file, err := os.Create("visits.txt")
 	if err != nil {
 		return err
